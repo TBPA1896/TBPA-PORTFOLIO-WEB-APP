@@ -6,11 +6,16 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Dynamic import avoids a Vite ⇄ @lovable CJS require cycle with nitro/vite.
+const { nitro } = await import("nitro/vite");
+
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
 // @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
 export default defineConfig({
   cloudflare: false, // Vercel SSR; omit so Lovable builds the CF Worker bundle for Wrangler
   tanstackStart: {
     server: { entry: "server" },
+    prerender: { enabled: false },
   },
+  plugins: [nitro({ preset: "vercel" })],
 });
